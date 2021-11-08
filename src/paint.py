@@ -72,7 +72,7 @@ class Paint:
         self.array = 0 * np.ones(784, dtype=np.uint8)
 
     def submit_drawing(self):
-        imageHandling.array_to_img(self.array, "../output/apple.png")
+        imageHandling.array_to_img(self.array, "../output/drawing.png")
 
 if __name__ == '__main__':
     Paint()
