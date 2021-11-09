@@ -1,8 +1,10 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import numpy as np
+import tensorflow as tf
 
 import imageHandling
+
 
 class Paint:
     BACKGROUND_COLOR = "#333333"
@@ -73,6 +75,11 @@ class Paint:
 
     def submit_drawing(self):
         imageHandling.array_to_img(self.array, "../output/drawing.png")
+        # model = tf.keras.models.load_model("../models/2021-11-08_18-46-00(16-10000)")
+        # probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
+        # predictions = probability_model.predict(self.array)
+        # print(predictions[0])
+        # print(np.argmax(predictions[0]))
 
 if __name__ == '__main__':
     Paint()
