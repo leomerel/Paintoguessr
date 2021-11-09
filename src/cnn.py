@@ -58,7 +58,7 @@ class Cnn:
     def get_prediction(self, image):
         probability_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
 
-        prediction = probability_model.predict(image)
+        prediction = probability_model(image)
         print(prediction)
         print(self.class_names[np.argmax(prediction[0])])
 
