@@ -3,119 +3,71 @@ import tensorflow as tf
 
 # Helper libraries
 import numpy as np
-import matplotlib.pyplot as plt
 
 import datetime
 
 import preprocess
+import plot
 
-class_names, images, labels = preprocess.createSets()
-train_images, test_images, train_labels, test_labels = preprocess.splitData(images, labels, test_size=0.3, shuffle=True)
 
-print(len(class_names), class_names)
+class Cnn:
+    def __init__(self):
+        self.class_names, self.images, self.labels = preprocess.createSets()
+        self.train_images, self.test_images, self.train_labels, self.test_labels = preprocess.splitData(self.images, self.labels, test_size=0.3, shuffle=True)
+        print(len(self.class_names), self.class_names)
 
-train_images = train_images / 255.0
-test_images = test_images / 255.0
+        self.train_images = preprocess.formatImages(self.train_images)
+        self.test_images = preprocess.formatImages(self.test_images)
 
-model = tf.keras.Sequential([
-    tf.keras.layers.Flatten(input_shape=(28, 28)),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(len(class_names))
-])
+    def create_model(self):
+        self.model = tf.keras.Sequential([
+            tf.keras.layers.Flatten(input_shape=(28, 28)),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dense(len(self.class_names))
+        ])
 
-model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=['accuracy'])
+        self.model.compile(optimizer='adam',
+                      loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                      metrics=['accuracy'])
 
-model.fit(train_images, train_labels, epochs=10)
+        self.model.fit(self.train_images, self.train_labels, epochs=10)
 
-model_path = "../models/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-model.save(model_path)
+        return self.model
 
-test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
+    def save_model(self, model):
+        model_path = "../models/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        model.save(model_path)
 
-print('\nTest accuracy:', test_acc)
+    def load_model(self, name = "2021-11-08_18-46-00(16-10000)"):
+        self.model = tf.keras.models.load_model("../models/" + name)
+        return self.model
 
-probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
-predictions = probability_model.predict(test_images)
-print(predictions[0])
-print(np.argmax(predictions[0]))
-print(test_labels[0])
+    def test_model(self, model):
+        test_loss, test_acc = model.evaluate(self.test_images, self.test_labels, verbose=2)
+        print('\nTest accuracy:', test_acc)
 
-def plot_image(i, predictions_array, true_label, img):
-  true_label, img = true_label[i], img[i]
-  plt.grid(False)
-  plt.xticks([])
-  plt.yticks([])
+    def get_predictions(self):
+        probability_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
+        predictions = probability_model.predict(self.test_images)
+        print(predictions[0])
+        print(np.argmax(predictions[0]))
+        print(self.test_labels[0])
 
-  plt.imshow(img, cmap=plt.cm.binary)
+        return predictions
 
-  predicted_label = np.argmax(predictions_array)
-  if predicted_label == true_label:
-    color = 'blue'
-  else:
-    color = 'red'
+    def get_prediction(self, image):
+        probability_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
 
-  plt.xlabel("{} {:2.0f}% ({})".format(class_names[predicted_label],
-                                100*np.max(predictions_array),
-                                class_names[true_label]),
-                                color=color)
+        prediction = probability_model.predict(image)
+        print(prediction)
+        print(self.class_names[np.argmax(prediction[0])])
 
-def plot_value_array(i, predictions_array, true_label):
-  true_label = true_label[i]
-  plt.grid(False)
-  plt.xticks(range(len(class_names)))
-  plt.yticks([])
-  thisplot = plt.bar(range(len(class_names)), predictions_array, color="#777777")
-  plt.ylim([0, 1])
-  predicted_label = np.argmax(predictions_array)
+        return prediction[0]
 
-  thisplot[predicted_label].set_color('red')
-  thisplot[true_label].set_color('blue')
 
-i = 0
-plt.figure(figsize=(6,3))
-plt.subplot(1,2,1)
-plot_image(i, predictions[i], test_labels, test_images)
-plt.subplot(1,2,2)
-plot_value_array(i, predictions[i],  test_labels)
-plt.show()
-
-i = 12
-plt.figure(figsize=(6,3))
-plt.subplot(1,2,1)
-plot_image(i, predictions[i], test_labels, test_images)
-plt.subplot(1,2,2)
-plot_value_array(i, predictions[i],  test_labels)
-plt.show()
-
-# Plot the first X test images, their predicted labels, and the true labels.
-# Color correct predictions in blue and incorrect predictions in red.
-num_rows = 5
-num_cols = 3
-num_images = num_rows*num_cols
-plt.figure(figsize=(2*2*num_cols, 2*num_rows))
-for i in range(num_images):
-  plt.subplot(num_rows, 2*num_cols, 2*i+1)
-  plot_image(i, predictions[i], test_labels, test_images)
-  plt.subplot(num_rows, 2*num_cols, 2*i+2)
-  plot_value_array(i, predictions[i], test_labels)
-plt.tight_layout()
-plt.show()
-
-# Grab an image from the test dataset.
-img = test_images[1]
-print(img.shape)
-
-# Add the image to a batch where it's the only member.
-img = (np.expand_dims(img,0))
-print(img.shape)
-
-predictions_single = probability_model.predict(img)
-print(predictions_single)
-
-plot_value_array(1, predictions_single[0], test_labels)
-_ = plt.xticks(range(len(class_names)), class_names, rotation=45)
-plt.show()
-
-np.argmax(predictions_single[0])
+# if __name__ == '__main__':
+#     cnn = Cnn()
+#     model = cnn.load_model()
+#     cnn.test_model(model)
+#     predictions = cnn.get_predictions()
+#     plot.plot_test_model(predictions, cnn.test_labels, cnn.test_images, cnn.class_names)

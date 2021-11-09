@@ -1,15 +1,16 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import numpy as np
-import tensorflow as tf
 
 import imageHandling
-
+import plot
 
 class Paint:
     BACKGROUND_COLOR = "#333333"
 
-    def __init__(self):
+    def __init__(self, cnn):
+        self.cnn = cnn
+
         self.window = tk.Tk()
         self.window.title("Paintoguessr")
         self.window.configure(bg=self.BACKGROUND_COLOR)
@@ -75,11 +76,10 @@ class Paint:
 
     def submit_drawing(self):
         imageHandling.array_to_img(self.array, "../output/drawing.png")
-        # model = tf.keras.models.load_model("../models/2021-11-08_18-46-00(16-10000)")
-        # probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
-        # predictions = probability_model.predict(self.array)
-        # print(predictions[0])
-        # print(np.argmax(predictions[0]))
 
-if __name__ == '__main__':
-    Paint()
+        image = (np.expand_dims(self.array.reshape(28, 28), 0))
+        # image = np.array([self.array.reshape(28, 28)])
+        prediction = self.cnn.get_prediction(image)
+        plot.plot_prediction(prediction, self.cnn.class_names)
+
+

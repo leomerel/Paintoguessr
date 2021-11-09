@@ -32,3 +32,7 @@ def splitData(data, target, test_size=0.1, shuffle=True):
                                                         shuffle=shuffle)
     return X_train, X_test, y_train, y_test
 
+
+def formatImages(images):
+    return images / 255.0
+
