@@ -130,3 +130,6 @@ dmypy.json
 
 # Numpy files
 *.npy
+
+# Drawings
+output/drawing.png
