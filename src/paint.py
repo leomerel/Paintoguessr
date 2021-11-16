@@ -4,6 +4,7 @@ import numpy as np
 
 import imageHandling
 import plot
+import preprocess
 import time
 
 class Paint:
@@ -93,6 +94,7 @@ class Paint:
 
             image = (np.expand_dims(self.array.reshape(28, 28), 0))
             # image = np.array([self.array.reshape(28, 28)])
+            image = preprocess.formatImages(image)
             prediction = self.cnn.get_prediction(image)
             txt = "I think you are drawing this : \n" + self.cnn.class_names[np.argmax(prediction)]
             self.lbl_prediction.configure(text=txt)
