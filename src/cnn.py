@@ -35,7 +35,7 @@ class Cnn:
         return self.model
 
     def save_model(self, model):
-        model_path = "../models/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        model_path = "./models/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         model.save(model_path)
 
     def load_model(self, name = "2021-11-08_18-46-00(16-10000)"):
@@ -65,9 +65,10 @@ class Cnn:
         return prediction[0]
 
 
-# if __name__ == '__main__':
-#     cnn = Cnn()
-#     model = cnn.load_model()
-#     cnn.test_model(model)
-#     predictions = cnn.get_predictions()
-#     plot.plot_test_model(predictions, cnn.test_labels, cnn.test_images, cnn.class_names)
+if __name__ == '__main__':
+    cnn = Cnn()
+    model = cnn.create_model()
+    cnn.save_model(model)
+    cnn.test_model(model)
+    predictions = cnn.get_predictions()
+    plot.plot_test_model(predictions, cnn.test_labels, cnn.test_images, cnn.class_names)
