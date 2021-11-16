@@ -22,7 +22,11 @@ class Cnn:
     def create_model(self):
         self.model = tf.keras.Sequential([
             tf.keras.layers.Flatten(input_shape=(28, 28)),
+            tf.keras.layers.Dense(512, activation='relu'),
             tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dense(128, activation='sigmoid'),
+            tf.keras.layers.Dense(64, activation='sigmoid'),
+            tf.keras.layers.Dropout(0.5),
             tf.keras.layers.Dense(len(self.class_names))
         ])
 
@@ -58,16 +62,24 @@ class Cnn:
     def get_prediction(self, image):
         probability_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
 
-        prediction = probability_model(image)
-        print(prediction)
-        print(self.class_names[np.argmax(prediction[0])])
+        prediction = probability_model(image)[0]
 
-        return prediction[0]
+        dict = {}
+        for i in range(len(self.class_names)):
+            dict[self.class_names[i]] = round(prediction[i].numpy() * 100, 2)
+
+        dict = {k: v for k, v in sorted(dict.items(), key=lambda item: item[1])}
+
+        print(dict)
+        print("best: ", self.class_names[np.argmax(prediction[0])])
+
+        return dict
 
 
-# if __name__ == '__main__':
-#     cnn = Cnn()
-#     model = cnn.load_model()
-#     cnn.test_model(model)
-#     predictions = cnn.get_predictions()
-#     plot.plot_test_model(predictions, cnn.test_labels, cnn.test_images, cnn.class_names)
+if __name__ == '__main__':
+    cnn = Cnn()
+    model = cnn.create_model()
+    cnn.save_model(model)
+    cnn.test_model(model)
+    predictions = cnn.get_predictions()
+    plot.plot_test_model(predictions, cnn.test_labels, cnn.test_images, cnn.class_names)

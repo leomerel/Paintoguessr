@@ -96,7 +96,15 @@ class Paint:
             # image = np.array([self.array.reshape(28, 28)])
             image = preprocess.formatImages(image)
             prediction = self.cnn.get_prediction(image)
-            txt = "I think you are drawing this : \n" + self.cnn.class_names[np.argmax(prediction)]
+
+            class_names = list(prediction.keys())[::-1]
+            confidence = list(prediction.values())[::-1]
+
+            txt = "I think you are drawing this : \n\n" +\
+                  class_names[0] + " (" + str(confidence[0]) + "%)\n" + \
+                  class_names[1] + " (" + str(confidence[1]) + "%)\n" + \
+                  class_names[2] + " (" + str(confidence[2]) + "%)\n"
+
             self.lbl_prediction.configure(text=txt)
 
             # plot.plot_prediction(prediction, self.cnn.class_names)
