@@ -4,7 +4,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-path = "../img/top16/"
+path = "../numpy_bitmap/"
 
 def createSets():
     npyFiles = [f for f in listdir(path) if isfile(join(path, f))]
